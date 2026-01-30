@@ -36,6 +36,33 @@ function getWeekRange() {
     };
 }
 
+async function launchBrowser() {
+    if (process.env.RENDER) {
+
+        process.env.TMPDIR = "/tmp";
+        process.env.TEMP = "/tmp";
+        process.env.TMP = "/tmp";
+
+        return await puppeteer.launch({
+            args: [
+                ...chromium.args,
+                "--no-sandbox",
+                "--disable-setuid-sandbox",
+                "--disable-dev-shm-usage",
+                "--disable-gpu",
+                "--no-zygote",
+                "--single-process"
+            ],
+            defaultViewport: chromium.defaultViewport,
+            executablePath: await chromium.executablePath(),
+            headless: chromium.headless,
+        });
+    } else {
+        return await puppeteer.launch({ headless: true });
+    }
+}
+
+
 // async function scrapeSchedule(username, password) {
 //     const browser = await puppeteer.launch({ headless: true });
 //     const page = await browser.newPage();
@@ -100,12 +127,8 @@ function getWeekRange() {
 // }
 
 async function scrapeSchedule(username, password) {
-    const browser = await puppeteer.launch({
-        args: chromium.args,
-        defaultViewport: chromium.defaultViewport,
-        executablePath: await chromium.executablePath(),
-        headless: chromium.headless,
-    });
+    const browser = await launchBrowser();
+
     const page = await browser.newPage();
 
     await page.goto('https://univer.kstu.kz/user/login?ReturnUrl=%2f', { waitUntil: 'networkidle2' });
