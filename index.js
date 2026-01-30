@@ -1,5 +1,6 @@
 const express = require('express');
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core');
+const chromium = require('@sparticuz/chromium');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
@@ -99,7 +100,12 @@ function getWeekRange() {
 // }
 
 async function scrapeSchedule(username, password) {
-    const browser = await puppeteer.launch({ headless: true });
+    const browser = await puppeteer.launch({
+        args: chromium.args,
+        defaultViewport: chromium.defaultViewport,
+        executablePath: await chromium.executablePath(),
+        headless: chromium.headless,
+    });
     const page = await browser.newPage();
 
     await page.goto('https://univer.kstu.kz/user/login?ReturnUrl=%2f', { waitUntil: 'networkidle2' });
